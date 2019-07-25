@@ -92,9 +92,6 @@ function _createXHR(options) {
 
     function errorFunc(evt) {
         clearTimeout(timeoutTimer)
-        if(!(evt instanceof Error)){
-            evt = new Error("" + (evt || "Unknown XMLHttpRequest Error") )
-        }
         evt.statusCode = 0
         return callback(evt, failureResponse)
     }
@@ -170,7 +167,9 @@ function _createXHR(options) {
 
     xhr.onreadystatechange = readystatechange
     xhr.onload = loadFunc
-    xhr.onerror = errorFunc
+
+    xhr.onerror = errorFunc.bind({}, Error('Lost connection to the Server. Please try again.'))
+
     // IE9 must have onprogress be set to a unique function.
     xhr.onprogress = function () {
         // IE must die
@@ -178,7 +177,9 @@ function _createXHR(options) {
     xhr.onabort = function(){
         aborted = true;
     }
-    xhr.ontimeout = errorFunc
+
+    xhr.ontimeout = errorFunc.bind({}, Error('Server connection timeout. Please try again.'))
+
     xhr.open(method, uri, !sync, options.username, options.password)
     //has to be after open
     if(!sync) {
